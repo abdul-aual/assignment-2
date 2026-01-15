@@ -1,7 +1,6 @@
-import { Response, NextFunction } from "express";
-import { AuthRequest } from "./auth.middleware";
+import { Response,Request, NextFunction } from "express";
 
-export const adminMiddleware = (req: AuthRequest,res: Response,next: NextFunction) => {
+export const adminMiddleware = (req: Request,res: Response,next: NextFunction) => {
   if (req.user?.role !== "admin") {
     return res.status(403).json({
       success: false,
@@ -10,3 +9,6 @@ export const adminMiddleware = (req: AuthRequest,res: Response,next: NextFunctio
   }
   next();
 };
+
+
+
