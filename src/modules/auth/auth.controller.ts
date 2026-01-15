@@ -2,6 +2,8 @@ import bcrypt from 'bcryptjs';
 import { Request, Response } from "express";
 import { authService, type SignupPayload } from "./auth.service";
 import { pool } from "../../config/db";
+import jwt from "jsonwebtoken"
+import config from '../../config';
 const signup = async (req: Request, res: Response) => {
   try {
     const { name, email, password, phone, role } = req.body as SignupPayload;
@@ -44,7 +46,7 @@ const signup = async (req: Request, res: Response) => {
 };
 
 const signin = async (req: Request, res: Response) => {
-    const { email, password } = req.body;
+    const {email, password } = req.body;
 
     if (!email || !password) {
         return res.status(400).json({
@@ -74,12 +76,15 @@ const signin = async (req: Request, res: Response) => {
       });
     }
   
-    // TODO: Generate JWT token here
-  
+    const secret = config.jwt_secret;
+    const token = jwt.sign({name:user.name, role:user.role}, secret, {
+      expiresIn:"7d",
+    });
     res.status(200).json({
         success: true,
         message: "Login successful",
         data: {
+          token: token,
           user: {
             id: user.id,
             name: user.name,
