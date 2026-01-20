@@ -1,9 +1,8 @@
-import bcrypt from 'bcryptjs';
 import { Request, Response } from "express";
-import { authService, type SignupPayload } from "./auth.service";
-import { pool } from "../../config/db";
-import jwt from "jsonwebtoken"
-import config from '../../config';
+import { authService, SignupPayload } from "./auth.service";
+import jwt from "jsonwebtoken";
+import config from "../../config";
+
 const signup = async (req: Request, res: Response) => {
   try {
     const { name, email, password, phone, role } = req.body as SignupPayload;
@@ -29,13 +28,13 @@ const signup = async (req: Request, res: Response) => {
         message: "Invalid role, only admin or customer allowed",
       });
     }
-    
-    const result = await authService.signup(req.body);
+
+    const user = await authService.signup({ name, email, password, phone, role });
 
     res.status(201).json({
-        success: true,
-        message: "User registered successfully",
-        data: result.rows[0],
+      success: true,
+      message: "User registered successfully",
+      data: user,
     });
   } catch (err: any) {
     res.status(500).json({
@@ -46,56 +45,45 @@ const signup = async (req: Request, res: Response) => {
 };
 
 const signin = async (req: Request, res: Response) => {
-    const {email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
     if (!email || !password) {
-        return res.status(400).json({
-          success: false,
-          message: "Enter email and password to login",
-        });
-      }
-  
-    const existingUser = await pool.query(
-      `SELECT * FROM "Users" WHERE email = $1`,
-      [email.toLowerCase()]
+      return res.status(400).json({
+        success: false,
+        message: "Enter email and password to login",
+      });
+    }
+
+    const user = await authService.signin(email, password);
+
+    const token = jwt.sign(
+      { name: user.name, role: user.role, id:user.id },
+      config.jwt_secret,
+      { expiresIn: "7d" }
     );
-  
-    if (existingUser.rowCount === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "User does not exist",
-      });
-    }
-  
-    const user = existingUser.rows[0];
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid password",
-      });
-    }
-  
-    const secret = config.jwt_secret;
-    const token = jwt.sign({name:user.name, role:user.role}, secret, {
-      expiresIn:"7d",
-    });
+
     res.status(200).json({
-        success: true,
-        message: "Login successful",
-        data: {
-          token: token,
-          user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            phone: user.phone,
-            role: user.role,
-          },
+      success: true,
+      message: "Login successful",
+      data: {
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
         },
-      });
-  };
-  
+      },
+    });
+  } catch (err: any) {
+    res.status(401).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
 
 export const authController = {
   signup,

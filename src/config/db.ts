@@ -11,14 +11,12 @@ const initDB = async () => {
       CREATE TABLE IF NOT EXISTS "Users" (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
-        email VARCHAR(150) NOT NULL UNIQUE,
-        password VARCHAR(255) NOT NULL,
+        email VARCHAR(150) NOT NULL UNIQUE CHECK (email = LOWER(email)),
+        password VARCHAR(255) NOT NULL CHECK (LENGTH(password) >= 6),
         phone VARCHAR(20) NOT NULL,
         role VARCHAR(20) NOT NULL CHECK (role IN ('admin','customer'))
       );
     `);
-    console.log("Users table created or already exists");
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS "Vehicles" (
         id SERIAL PRIMARY KEY,
@@ -29,8 +27,7 @@ const initDB = async () => {
         availability_status VARCHAR(20) NOT NULL CHECK (availability_status IN ('available','booked'))
       );
     `);
-    console.log("Vehicles table created or already exists");
-
+  
     await pool.query(`
       CREATE TABLE IF NOT EXISTS "Bookings" (
         id SERIAL PRIMARY KEY,
@@ -42,7 +39,6 @@ const initDB = async () => {
         status VARCHAR(20) NOT NULL CHECK (status IN ('active','cancelled','returned'))
       );
     `);
-    console.log("Bookings table created or already exists");
 
   } catch (err: any) {
     console.error("Error creating tables:", err.message);

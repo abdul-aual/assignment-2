@@ -5,7 +5,8 @@ import { adminMiddleware } from "../../middleware/role.middleware";
 
 const router = express.Router();
 
-router.get("/",authMiddleware, adminMiddleware, userController.getAllUsers
-);
+router.get("/",authMiddleware, adminMiddleware, userController.getAllUsers);
+router.put("/:userId", authMiddleware, userController.updateUser);
+router.delete("/:userId", authMiddleware, adminMiddleware, userController.deleteUser);
 
 export const userRoutes = router;
