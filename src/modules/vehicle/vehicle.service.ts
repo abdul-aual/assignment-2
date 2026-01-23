@@ -24,17 +24,32 @@ const createVehicle = async (payload: VehiclePayload) => {
      RETURNING *`,
     [vehicle_name, type, registration_number, daily_rent_price, availability_status]
   );
-
-  return result.rows[0];
+  const vehicle = result.rows[0];
+  vehicle.daily_rent_price = Number(vehicle.daily_rent_price);
+  return vehicle;
 };
 
-const getVehicle = async()=>{
-    const result = await pool.query(`SELECT * FROM "Vehicles" ORDER BY id ASC`);
-    return result;
+const getVehicle = async () => {
+  const result = await pool.query(
+    `SELECT * FROM "Vehicles" ORDER BY id ASC`
+  );
+
+  const vehicles = result.rows.map(vehicle => ({
+    ...vehicle,
+    daily_rent_price: Number(vehicle.daily_rent_price),
+  }));
+
+  return vehicles;
 };
+
 const getSingleVehicle = async(id:string)=>{
     const result = await pool.query(`SELECT * FROM "Vehicles" WHERE id=$1`, [id]);
-    return result;
+    if (result.rows.length === 0) {
+      return null; 
+    }
+    const vehicle = result.rows[0];
+   vehicle.daily_rent_price = Number(vehicle.daily_rent_price);
+   return vehicle;
 };
 
 const updateVehicle = async (id: string, payload: Partial<VehiclePayload>) => {
@@ -85,8 +100,10 @@ const updateVehicle = async (id: string, payload: Partial<VehiclePayload>) => {
       id,
     ]
   );
+  const updatedVehicle = result.rows[0];
+  updatedVehicle.daily_rent_price = Number(updatedVehicle.daily_rent_price);
 
-  return result;
+  return updatedVehicle;
 };
 
 const deleteVehicle = async (id: string) => {

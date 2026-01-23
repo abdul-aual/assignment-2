@@ -84,13 +84,13 @@ const createBooking = async (payload: BookingPayload, bookerID:string, role: "cu
     id: row.id,
     customer_id: row.customer_id,
     vehicle_id: row.vehicle_id,
-    rent_start_date: row.rent_start_date,
-    rent_end_date: row.rent_end_date,
-    total_price: row.total_price,
+    rent_start_date: row.rent_start_date.toISOString().split("T")[0], 
+    rent_end_date: row.rent_end_date.toISOString().split("T")[0],     
+    total_price: Number(row.total_price),
     status: row.status,
     vehicle: {
       vehicle_name: row.vehicle_name,
-      daily_rent_price: row.daily_rent_price,
+      daily_rent_price: Number(row.daily_rent_price),
     },
   };
 };
@@ -119,9 +119,9 @@ await autoUpdateVehicleAvailability();
     return result.rows.map((row) => ({
       id: row.booking_id,
       vehicle_id: row.vehicle_id,
-      rent_start_date: row.rent_start_date,
-      rent_end_date: row.rent_end_date,
-      total_price: row.total_price,
+      rent_start_date: row.rent_start_date.toISOString().split("T")[0], 
+    rent_end_date: row.rent_end_date.toISOString().split("T")[0],     
+    total_price: Number(row.total_price),
       status: row.status,
       vehicle: {
         vehicle_name: row.vehicle_name,
@@ -154,9 +154,9 @@ await autoUpdateVehicleAvailability();
       id: row.booking_id,
       customer_id: row.customer_id,
       vehicle_id: row.vehicle_id,
-      rent_start_date: row.rent_start_date,
-      rent_end_date: row.rent_end_date,
-      total_price: row.total_price,
+      rent_start_date: row.rent_start_date.toISOString().split("T")[0], 
+    rent_end_date: row.rent_end_date.toISOString().split("T")[0],     
+    total_price: Number(row.total_price),
       status: row.status,
       customer: {
         name: row.customer_name,
@@ -209,14 +209,17 @@ userId: string ) => {
       `UPDATE "Vehicles" SET availability_status='available' WHERE id=$1`,
       [booking.vehicle_id]
     );
+    const bookingRow = result.rows[0];
   
     return {
       success: true,
       message: "Booking cancelled successfully",
       data: {
-        ...result.rows[0],
-        vehicle: { availability_status: "cancelled" },
-      },
+        ...bookingRow,
+        total_price: Number(bookingRow.total_price),
+        rent_start_date: bookingRow.rent_start_date.toISOString().split("T")[0],
+        rent_end_date: bookingRow.rent_end_date.toISOString().split("T")[0],
+      }
     };
   }
   
@@ -235,12 +238,15 @@ userId: string ) => {
       `UPDATE "Vehicles" SET availability_status='available' WHERE id = $1`,
       [booking.vehicle_id]
     );
-
+    const bookingRow = result.rows[0];
     return {
       success: true,
       message: "Booking marked as returned. Vehicle is now available",
       data: {
-        ...result.rows[0],
+        ...bookingRow,
+        total_price: Number(bookingRow.total_price),
+        rent_start_date: bookingRow.rent_start_date.toISOString().split("T")[0],
+        rent_end_date: bookingRow.rent_end_date.toISOString().split("T")[0],
         vehicle: { availability_status: "available" },
       },
     };
@@ -259,6 +265,12 @@ const autoUpdateVehicleAvailability = async () => {
     WHERE v.id = b.vehicle_id
       AND b.status = 'active'
       AND b.rent_end_date < $1
+  `, [today]);
+  await pool.query(`
+    UPDATE "Bookings"
+    SET status = 'returned'
+    WHERE status = 'active'
+      AND rent_end_date < $1
   `, [today]);
 };
 

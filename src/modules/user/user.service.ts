@@ -46,7 +46,7 @@ const deleteUser=async(userId:string)=>{
   if(checkUser.rows.length===0){
     throw new Error("User does not exist");
   }
-  const checkUserBookings=  await pool.query(`SELECT id FROM "Bookings" WHERE customer_id=$1`, [userId]);
+  const checkUserBookings=  await pool.query(`SELECT id FROM "Bookings" WHERE customer_id=$1 AND status='active'`, [userId]); //and status =active hobe
   if(checkUserBookings.rows.length>0){
     throw new Error("User has active Bookings, can not be deleted");
   };
