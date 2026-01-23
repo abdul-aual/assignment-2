@@ -1,21 +1,36 @@
-Submission Guide
-← Back to Main Documentation
+# Vehicle Rental System 🚗
 
-Submission Guidelines
-1. Codebase & Documentation
-README.md: Must be professional and include:
+[Live Deployment](https://assignment2-seven-livid.vercel.app)
 
-Project Name & Live URL.
-Features & Technology Stack.
-Setup & Usage Instructions.
-2. What You Need to Provide
-GitHub Repository Link
-Live Deployment Link
-📝 Example Submission Format
-GitHub Repo: Your GitHub Repo Link
-Live Deployment: Your Live Deployment Link
+---
 
+## 🎯 Project Overview
 
+A backend API for a vehicle rental management system that handles:
+
+- Vehicles - Manage vehicle inventory with availability tracking  
+- Customers - Manage customer accounts and profiles  
+- Bookings - Handle vehicle rentals, returns and cost calculation  
+- Authentication - Secure role-based access control (Admin and Customer roles)  
+
+---
+
+## 🛠️ Technology Stack
+
+- Node.js + TypeScript  
+- Express.js (Web framework)  
+- PostgreSQL (Database)  
+- bcrypt (Password hashing)  
+- jsonwebtoken (JWT authentication)  
+
+---
+
+## 📁 Code Structure
+
+The project follows a **modular pattern** with clear separation of concerns.  
+Organized into feature-based modules: `auth`, `users`, `vehicles`, `bookings`.  
+
+Each module has **routes**, **controllers**, and **services** for proper layering.
 
 ---
 
@@ -61,7 +76,7 @@ Live Deployment: Your Live Deployment Link
 
 **Flow:**
 
-- Passwords hashed with `bcrypt`  
+- Passwords are hashed with `bcrypt`  
 - Login via `/api/v1/auth/signin` → receive JWT token  
 - Protected endpoints require `Authorization: Bearer <token>`  
 
@@ -70,14 +85,12 @@ Live Deployment: Your Live Deployment Link
 ## 🌐 API Endpoints
 
 ### Authentication
-
 | Method | Endpoint | Access | Description |
 |--------|---------|--------|------------|
 | POST   | `/api/v1/auth/signup` | Public | Register new user |
 | POST   | `/api/v1/auth/signin` | Public | Login and receive JWT |
 
 ### Vehicles
-
 | Method | Endpoint | Access | Description |
 |--------|---------|--------|------------|
 | POST   | `/api/v1/vehicles` | Admin | Add new vehicle |
@@ -87,7 +100,6 @@ Live Deployment: Your Live Deployment Link
 | DELETE | `/api/v1/vehicles/:vehicleId` | Admin | Delete vehicle (if no active bookings) |
 
 ### Users
-
 | Method | Endpoint | Access | Description |
 |--------|---------|--------|------------|
 | GET    | `/api/v1/users` | Admin | View all users |
@@ -95,7 +107,6 @@ Live Deployment: Your Live Deployment Link
 | DELETE | `/api/v1/users/:userId` | Admin | Delete user (if no active bookings) |
 
 ### Bookings
-
 | Method | Endpoint | Access | Description |
 |--------|---------|--------|------------|
 | POST   | `/api/v1/bookings` | Customer / Admin | Create booking |
@@ -107,7 +118,6 @@ Live Deployment: Your Live Deployment Link
 ## 📝 Response Format
 
 **Success Response:**
-
 ```json
 {
   "success": true,
